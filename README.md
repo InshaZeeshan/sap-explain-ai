@@ -1,10 +1,34 @@
 # SAP Explain AI
 
-**SAP Explain AI** is an AI-assisted SAP knowledge explorer designed to make SAP technical concepts easier to search, understand, and navigate.
+**SAP Explain AI** is a full-stack, AI-assisted SAP knowledge explorer designed to make SAP technical concepts, ABAP topics, transaction codes, and technical questions easier to search and understand.
 
-The application uses a **local-first search architecture**. Known SAP concepts are retrieved from a curated local knowledge base. When a submitted query is not available locally, the application securely sends it through a Node.js/Express backend to the **Gemini API** and displays an AI-generated explanation.
+The application uses a **local-first search architecture**. Submitted queries are first checked against a curated SAP knowledge base. When no local result is available, the query is securely forwarded through a Node.js/Express backend to the **Google Gemini API** for an AI-generated explanation.
 
-> **Note:** SAP Explain AI is an independent learning and portfolio project. It is not affiliated with SAP. AI-generated information should be verified before being used in a production SAP environment.
+🌐 **Live Demo:** https://sap-explain-ai-frontend.onrender.com
+
+> **Note:** SAP Explain AI is an independent learning and portfolio project. It is not affiliated with SAP. AI-generated technical information should be verified before being used in a production SAP environment.
+
+---
+
+## What It Demonstrates
+
+SAP Explain AI was built as a hands-on exploration of full-stack development, API integration, generative AI, and SAP-focused application design.
+
+The project demonstrates:
+
+- Full-stack React and TypeScript development
+- Node.js and Express REST API development
+- Google Gemini API integration
+- Local-first search with AI fallback
+- Secure server-side API key management
+- Frontend/backend service separation
+- Cross-origin production communication using CORS
+- AI quota and service-error handling
+- Graceful degradation when the external AI service is unavailable
+- Responsive UI development
+- Production deployment using Render
+- Git and GitHub development workflow
+- Domain-focused application architecture
 
 ---
 
@@ -12,23 +36,23 @@ The application uses a **local-first search architecture**. Known SAP concepts a
 
 ### Home
 
-The application provides a focused search interface for SAP errors, T-Codes, ABAP concepts, and other technical questions.
+SAP Explain AI provides a focused search interface for SAP transaction codes, ABAP concepts, technical terminology, errors, and natural-language SAP questions.
 
 ![SAP Explain AI Home](docs/screenshots/home.png)
 
 ### AI-Powered SAP Explanations
 
-When a query is not available in the local knowledge base, SAP Explain AI falls back to Gemini through the Express backend.
+When a submitted query is not available in the local knowledge base, SAP Explain AI uses the backend AI service to generate an explanation.
 
 ![SE80 AI Explanation](docs/screenshots/ai-se80-result.png)
 
-The AI fallback also supports natural-language SAP questions.
+The AI fallback also supports natural-language SAP and ABAP questions.
 
 ![ABAP AI Explanation](docs/screenshots/ai-abap-result.png)
 
 ### Future Vision
 
-The project is designed to evolve from general AI-generated explanations toward more structured and SAP-aware technical responses.
+The project is designed to evolve from general SAP search toward more structured and SAP-aware technical assistance.
 
 ![SAP Explain AI Future Vision](docs/screenshots/future-vision.png)
 
@@ -36,163 +60,111 @@ The project is designed to evolve from general AI-generated explanations toward 
 
 ## Why SAP Explain AI?
 
-General-purpose AI assistants and search engines can already answer many SAP-related questions. SAP Explain AI is not intended to replace them.
+General-purpose AI assistants can already answer many SAP-related questions.
 
-Instead, this project explores how general AI capabilities can be adapted into a **domain-focused technical assistant for the SAP ecosystem**.
+SAP Explain AI is not intended to replace them.
 
-Rather than sending every query directly to an AI model, SAP Explain AI first checks a curated local knowledge base. AI is used as a fallback when a local answer is unavailable.
+Instead, this project explores how general AI capabilities can be placed behind a **domain-focused application architecture designed specifically around SAP knowledge and developer workflows**.
 
-This creates a hybrid approach:
+Rather than sending every query directly to an AI model, SAP Explain AI first searches its own curated knowledge base.
+
+Only queries without a local match are sent to the AI service.
+
+This creates a hybrid architecture:
 
 ```text
-              User submits SAP query
-                        |
-                        v
-              Local SAP Knowledge Base
-                        |
-                 +------+------+
-                 |             |
-              Found         Not Found
-                 |             |
-                 v             v
-           Local Result   Express Backend
-                               |
-                               v
-                           Gemini API
-                               |
-                               v
-                       AI Explanation
+                 User submits SAP query
+                          |
+                          v
+                Local SAP Knowledge Base
+                          |
+                   +------+------+
+                   |             |
+                Found         Not Found
+                   |             |
+                   v             v
+             Local Result   Express REST API
+                                 |
+                                 v
+                            Gemini API
+                                 |
+                                 v
+                         AI Explanation
 ```
 
-This architecture allows the application to combine curated domain knowledge with the flexibility of generative AI instead of behaving only as a generic AI chat interface.
+This approach separates **domain knowledge maintained by the application** from **content dynamically generated by an external AI model**.
 
-The long-term goal is to make the application increasingly aware of SAP terminology, development workflows, errors, transaction codes, ABAP concepts, and eventually authorized SAP system context.
+It also provides a foundation for expanding the application with more structured SAP knowledge and future SAP integrations.
 
 ---
 
 ## Current Features
 
-The current version of SAP Explain AI includes:
+The current version includes:
 
-- **Local-first SAP search** using a curated knowledge base
-- **Gemini-powered AI fallback** when no local result is found
-- Search support for:
-  - SAP Transaction Codes
-  - ABAP concepts
-  - SAP technical terminology
-  - Error-related questions
-  - General SAP technical questions
-- **Submit-only search behavior** to prevent unnecessary searches while typing
-- Loading feedback while an AI response is being generated
-- Dedicated handling for AI quota exhaustion
-- Separate handling for general AI service failures
-- Markdown rendering for AI-generated responses
-- Dedicated visual treatment for AI-generated answers
-- Responsive user interface
-- Client-side routing with a custom 404 page
-- Server-side protection of the Gemini API key
-- Clear distinction between curated local results and AI-generated content
+- **Local-first SAP search**
+- Curated SAP knowledge base
+- Gemini-powered AI fallback
+- Natural-language SAP queries
+- SAP transaction-code search
+- ABAP concept search
+- SAP technical terminology search
+- Submit-only search behavior
+- AI loading states
+- Dedicated AI-generated result presentation
+- AI quota detection
+- External AI service-error handling
+- Graceful fallback messaging
+- Responsive interface
+- Client-side routing
+- Custom 404 page
+- Server-side Gemini API key protection
+- CORS configuration for deployed frontend/backend communication
+- Separate frontend and backend production deployments
+- Dedicated About and Future Vision page
 
 ---
 
 ## How It Works
 
-When a user submits a search, SAP Explain AI first checks whether the query can be answered using its local SAP knowledge base.
+When a user submits a query, SAP Explain AI first checks whether the application can answer it using the local SAP knowledge base.
 
-If a matching result exists, it is displayed immediately without making an AI request.
+If a matching result exists, it is returned immediately without making an AI request.
 
-If no matching local result exists, the frontend calls the application's backend API. The Express backend communicates with Gemini using a server-side API key and returns the generated explanation to the frontend.
+If no local result exists, the frontend sends the query to the Express backend.
 
-```text
-Search Query
-     |
-     v
-React Frontend
-     |
-     v
-Local Search Service
-     |
- +---+---+
- |       |
-Match   No Match
- |       |
- v       v
-Local   POST /api/explain
-Result       |
-             v
-       Express Backend
-             |
-             v
-         Gemini API
-             |
-       +-----+------+
-       |            |
-    Success      API Error
-       |            |
-       v            v
-AI-generated   Graceful Error
-   Result        Handling
-```
-
-The Gemini API key remains on the server and is not exposed to frontend code.
-
----
-
-## Current AI Service Limitation
-
-SAP Explain AI currently uses the **Gemini API** as its AI fallback when a submitted query cannot be answered by the local knowledge base.
-
-The API tier used by this portfolio project has a **limited request quota**. As a result, Gemini-powered explanations may become temporarily unavailable when the available quota is exhausted.
-
-This limitation affects **AI-generated fallback responses only**.
-
-The application's curated local knowledge base remains independent of Gemini and continues to provide results for queries it already supports.
-
-When the backend detects a Gemini quota response, it returns a specific error:
+The backend then communicates with the Gemini API and returns the generated explanation.
 
 ```text
-AI_QUOTA_EXCEEDED
+                       Search Query
+                            |
+                            v
+                  React + TypeScript
+                       Frontend
+                            |
+                            v
+                   Local Search Service
+                            |
+                     +------+------+
+                     |             |
+                   Match        No Match
+                     |             |
+                     v             v
+               Local Result   POST /api/explain
+                                   |
+                                   v
+                             Express Backend
+                                   |
+                                   v
+                              Gemini API
+                                   |
+                                   v
+                           AI-generated Result
 ```
 
-The frontend recognizes this condition and displays a dedicated **AI request quota reached** message instead of presenting the situation as a generic application failure.
+The browser never communicates directly with Gemini.
 
-Conceptually:
-
-```text
-                   Search
-                      |
-                      v
-             Local Knowledge Base
-                      |
-              +-------+-------+
-              |               |
-            Match          No Match
-              |               |
-              v               v
-         Local Result      Gemini API
-                              |
-                       +------+------+
-                       |             |
-                    Success        Quota
-                       |          Exhausted
-                       v             |
-                  AI Result          v
-                              Quota Warning
-```
-
-The exact external API quota can depend on the configured Gemini model, account, project, and service tier. For this reason, SAP Explain AI does not assume a fixed number of available AI requests.
-
-A more production-oriented implementation could reduce this dependency through:
-
-- A higher-capacity API tier
-- Response caching
-- A substantially expanded local SAP knowledge base
-- Request throttling and rate controls
-- Reuse of previously generated explanations
-- Improved retry and service-resilience strategies
-- Monitoring of external AI service availability
-
-This is an external-service constraint of the current prototype rather than a limitation of the local search architecture itself.
+The Gemini API key remains on the backend and is not bundled into the client-side application.
 
 ---
 
@@ -207,19 +179,24 @@ This is an external-service constraint of the current prototype rather than a li
 - React Router DOM
 - Framer Motion
 - Lucide React
-- React Markdown
 
 ### Backend
 
 - Node.js
 - Express.js
 - TypeScript
+- CORS
 - dotenv
 
 ### AI
 
 - Google Gemini API
 - Google GenAI SDK
+
+### Deployment
+
+- Render Web Service — backend
+- Render Static Site — frontend
 
 ### Development
 
@@ -231,7 +208,7 @@ This is an external-service constraint of the current prototype rather than a li
 
 ## Project Architecture
 
-The project separates UI components, search logic, local knowledge, backend communication, and AI integration into different layers.
+The project separates UI components, search logic, local SAP knowledge, backend communication, and AI integration into independent layers.
 
 ```text
 sap-explain-ai/
@@ -277,7 +254,7 @@ sap-explain-ai/
 |   |
 |   `-- utils/
 |
-|-- .env
+|-- .env.example
 |-- .gitignore
 |-- README.md
 |-- package.json
@@ -285,37 +262,195 @@ sap-explain-ai/
 `-- vite.config.ts
 ```
 
-### Key Responsibilities
+---
 
-**`knowledgeBase.ts`**
+## Key Components
 
-Contains curated local SAP knowledge used before the AI fallback.
+### `knowledgeBase.ts`
 
-**`searchService.ts`**
+Contains curated SAP knowledge that can be searched without calling an external AI service.
 
-Handles searching the local knowledge base.
+### `searchService.ts`
 
-**`useSearch.ts`**
+Handles searching and matching against the local SAP knowledge base.
 
-Manages search input and local search results.
+### `useSearch.ts`
 
-**`aiService.ts`**
+Manages search state and local search results.
 
-Handles communication between the React frontend and the backend AI endpoint. It also preserves backend AI error codes so the interface can distinguish quota exhaustion from other service failures.
+### `aiService.ts`
 
-**`server/index.ts`**
+Handles communication between the React frontend and the deployed backend API.
 
-Runs the Express backend, securely communicates with Gemini, and translates external AI errors into application-specific responses such as `AI_QUOTA_EXCEEDED`.
+The service supports different environments using the frontend environment variable:
 
-**`SearchResults.tsx`**
+```env
+VITE_API_BASE_URL=your_backend_url
+```
 
-Coordinates local results, AI fallback, loading states, quota handling, general errors, Markdown rendering, and result presentation.
+### `server/index.ts`
+
+Runs the Express backend.
+
+Its responsibilities include:
+
+- Receiving AI explanation requests
+- Validating submitted queries
+- Communicating securely with Gemini
+- Protecting the Gemini API key
+- Handling Gemini quota errors
+- Handling general AI service failures
+- Configuring CORS
+- Providing a backend health endpoint
+
+### `SearchResults.tsx`
+
+Coordinates:
+
+- Submitted search queries
+- Local results
+- AI fallback
+- Loading states
+- AI-generated results
+- Quota messages
+- Service-error messages
+
+---
+
+## Local-First Search
+
+One of the main architectural decisions in SAP Explain AI is to avoid sending every search to an external AI provider.
+
+For known queries:
+
+```text
+Known SAP Query
+      |
+      v
+Local Knowledge Base
+      |
+      v
+Local Answer
+      |
+      v
+No AI request required
+```
+
+For queries without a local match:
+
+```text
+Unknown SAP Query
+       |
+       v
+Express Backend
+       |
+       v
+Gemini API
+       |
+       v
+AI Explanation
+```
+
+This architecture provides several advantages:
+
+- Known information can be maintained directly by the application
+- Local results do not depend on external AI availability
+- Unnecessary AI requests can be avoided
+- AI can still handle questions outside the curated dataset
+- External AI failures do not completely disable the application's search functionality
+
+---
+
+## AI Availability and Quota Handling
+
+AI-generated explanations depend on the availability and usage limits of the configured Gemini API model.
+
+External AI providers may enforce:
+
+- Request quotas
+- Rate limits
+- Model availability restrictions
+- Usage limits
+
+SAP Explain AI handles these limitations explicitly.
+
+When Gemini returns a quota or rate-limit response, the backend identifies the condition and returns a dedicated application error:
+
+```text
+AI_QUOTA_EXCEEDED
+```
+
+The frontend then displays a clear quota message instead of presenting the failure as an unknown application error.
+
+```text
+AI Request
+     |
+     v
+Gemini API
+     |
+ +---+------------------+
+ |                      |
+Success             Quota Exceeded
+ |                      |
+ v                      v
+AI Result       AI_QUOTA_EXCEEDED
+                        |
+                        v
+                 Informative UI
+```
+
+Local SAP searches remain available even when the external AI quota has been reached.
+
+Other AI provider failures are handled separately using:
+
+```text
+AI_SERVICE_ERROR
+```
+
+This allows the application to distinguish between quota exhaustion and general external-service failures.
+
+> Exact AI quotas and rate limits are controlled by the external AI provider and may change depending on the configured model, account, region, or provider policy.
+
+---
+
+## Error Handling and Graceful Degradation
+
+SAP Explain AI is designed so that an external AI failure does not appear as an unexplained application failure.
+
+The backend distinguishes between different error conditions.
+
+For example:
+
+```text
+Invalid Query
+     |
+     v
+INVALID_QUERY
+```
+
+```text
+AI Quota Reached
+     |
+     v
+AI_QUOTA_EXCEEDED
+```
+
+```text
+Other AI Failure
+     |
+     v
+AI_SERVICE_ERROR
+```
+
+The frontend can then present an appropriate message for each situation.
+
+Most importantly, the curated local SAP knowledge base continues to function independently of Gemini availability.
 
 ---
 
 ## Example Searches
 
-SAP Explain AI can be explored with searches such as:
+SAP Explain AI can be explored using queries such as:
 
 ```text
 SE11
@@ -330,71 +465,264 @@ What is an ABAP internal table?
 ```
 
 ```text
+Explain ABAP hashed tables
+```
+
+```text
 What is SAP Basis?
 ```
 
-Queries already available in the local knowledge base are answered locally.
+Queries available in the curated knowledge base are answered locally.
 
-Queries without a local match are passed to the AI fallback when the external AI service is available.
+Queries without a local match are passed to the AI fallback.
 
 ---
 
-## Why Local-First?
+## Security
 
-Sending every query to an AI model is not always necessary.
+The Gemini API key is stored as a server-side environment variable.
 
-SAP Explain AI therefore checks its curated knowledge base before making an AI request.
+For local development:
 
-```text
-Known Query
-    |
-    v
-Local Answer
-    |
-    +-- No AI request required
-
-
-Unknown Query
-    |
-    v
-Express Backend
-    |
-    v
-Gemini API
-    |
-    v
-AI Explanation
+```env
+GEMINI_API_KEY=your_gemini_api_key
 ```
 
-This approach provides a foundation for maintaining curated answers for important SAP concepts while retaining the flexibility to answer questions outside the local dataset.
+The `.env` file is excluded from Git using `.gitignore`.
 
-It also creates a clear architectural boundary between **domain knowledge maintained by the application** and **content generated dynamically by an external AI model**.
+The frontend does **not** contain the Gemini API key and does not communicate directly with Gemini.
 
-The local-first approach additionally reduces unnecessary AI requests and helps limit dependence on external API availability and quota.
+```text
+Browser
+   |
+   v
+React Frontend
+   |
+   v
+Express Backend
+   |
+   v
+Gemini API
+```
+
+This prevents the Gemini API credential from being included in the frontend production bundle.
+
+Production secrets are configured through the backend deployment environment rather than committed to the repository.
+
+> Never commit a real API key, `.env` file, or other secret to GitHub.
+
+---
+
+## Environment Variables
+
+### Backend
+
+Create a `.env` file in the project root for local development:
+
+```env
+GEMINI_API_KEY=your_gemini_api_key_here
+```
+
+An example can be provided through:
+
+```text
+.env.example
+```
+
+The `.env.example` file should contain placeholders only and can safely be committed.
+
+### Frontend Production
+
+The deployed frontend uses:
+
+```env
+VITE_API_BASE_URL=https://your-backend-service.example.com
+```
+
+This tells the frontend where the production Express API is hosted.
+
+The frontend then communicates with:
+
+```text
+VITE_API_BASE_URL
+        +
+/api/explain
+```
+
+---
+
+## Running the Project Locally
+
+### Prerequisites
+
+Install:
+
+- Node.js
+- npm
+- Git
+
+A Gemini API key is required only for AI-generated fallback explanations.
+
+Local knowledge-base searches do not require Gemini.
+
+### 1. Clone the Repository
+
+```bash
+git clone https://github.com/InshaZeeshan/sap-explain-ai.git
+```
+
+Enter the project directory:
+
+```bash
+cd sap-explain-ai
+```
+
+### 2. Install Dependencies
+
+```bash
+npm install
+```
+
+### 3. Configure Gemini
+
+Create a `.env` file in the project root:
+
+```env
+GEMINI_API_KEY=your_gemini_api_key_here
+```
+
+Replace the placeholder with your own API key.
+
+Do not commit `.env`.
+
+### 4. Start the Backend
+
+```bash
+npx tsx server/index.ts
+```
+
+During local development, the backend runs on port `3001` unless another port is provided through the environment.
+
+The health endpoint is:
+
+```text
+http://localhost:3001/api/health
+```
+
+A successful response looks similar to:
+
+```json
+{
+  "status": "ok",
+  "message": "SAP Explain AI backend is running"
+}
+```
+
+### 5. Start the Frontend
+
+Open another terminal:
+
+```bash
+npm run dev
+```
+
+Open the local URL displayed by Vite.
+
+---
+
+## Production Deployment
+
+SAP Explain AI is deployed as two independent services.
+
+### Frontend
+
+The React/Vite application is deployed as a **Render Static Site**.
+
+Production build:
+
+```bash
+npm install && npm run build
+```
+
+Publish directory:
+
+```text
+dist
+```
+
+### Backend
+
+The Node.js/Express API is deployed as a **Render Web Service**.
+
+The backend uses the runtime-provided `PORT` environment variable:
+
+```ts
+const PORT = process.env.PORT || 3001;
+```
+
+This allows the same backend to work both locally and in the hosted environment.
+
+The production architecture is therefore:
+
+```text
+             User Browser
+                  |
+                  v
+        Render Static Site
+        React + TypeScript
+                  |
+                  | HTTPS API request
+                  v
+        Render Web Service
+          Node + Express
+                  |
+                  v
+             Gemini API
+```
+
+CORS is configured on the backend to allow communication from the deployed frontend while also supporting local development.
+
+---
+
+## Production Build
+
+To verify that the frontend compiles successfully:
+
+```bash
+npm run build
+```
+
+Vite generates the production frontend inside:
+
+```text
+dist/
+```
+
+A successful production build verifies the TypeScript project and creates the optimized frontend bundle.
 
 ---
 
 ## Future Vision
 
-The current version establishes the core architecture:
+The current version establishes the foundation:
 
 ```text
-SAP Search + Local Knowledge + Backend + AI Fallback
+SAP Search
+    +
+Curated Knowledge
+    +
+Express Backend
+    +
+AI Fallback
 ```
 
-The longer-term goal is to evolve SAP Explain AI from a search application into a more specialized **SAP technical assistant**.
+The longer-term goal is to evolve SAP Explain AI into a more specialized **SAP technical assistant**.
 
-### 1. Structured SAP Answers
+### Structured SAP Answers
 
-Instead of returning the same generic paragraph format for every question, responses could be structured according to the type of SAP query.
+Instead of returning the same response structure for every question, future versions could generate formats appropriate to the detected SAP concept.
 
-For example, a future search for:
-
-```text
-SE80
-```
-
-could produce:
+For example:
 
 ```text
 SE80 — Object Navigator
@@ -423,24 +751,20 @@ Think of SE80 as a central workspace for exploring
 and working with different ABAP development objects.
 ```
 
----
+### Intelligent Query Classification
 
-### 2. Intelligent Query Classification
+Queries could automatically be classified as:
 
-The application could automatically classify submitted queries into categories such as:
+- Transaction codes
+- ABAP concepts
+- SAP errors
+- Runtime dumps
+- Development objects
+- Configuration concepts
+- Troubleshooting questions
+- General SAP concepts
 
-- Transaction Code
-- ABAP concept
-- SAP error
-- Runtime dump
-- Development object
-- Configuration concept
-- Troubleshooting question
-- General SAP concept
-
-The response format could then change according to the detected category.
-
-For example:
+The response format could then adapt to the detected category.
 
 ```text
 "SE80"
@@ -449,7 +773,7 @@ For example:
 Transaction Code
    |
    v
-T-Code-specific response structure
+T-Code-specific response
 ```
 
 while:
@@ -461,56 +785,46 @@ while:
 ABAP Concept
    |
    v
-Concept-specific explanation
+Concept-specific response
 ```
 
----
+### Guided SAP Error Troubleshooting
 
-### 3. Guided SAP Error Troubleshooting
-
-Instead of only explaining an SAP error, a future version could provide a structured troubleshooting flow:
+A future troubleshooting mode could structure SAP error responses as:
 
 ```text
 SAP Error
     |
     v
-What does it mean?
+Meaning
     |
     v
-Possible causes
+Possible Causes
     |
     v
-What should I check?
+Investigation Steps
     |
     v
-Relevant SAP transactions
+Relevant Transactions
     |
     v
-Suggested next steps
+Suggested Next Actions
 ```
 
-This could make the application more useful for technical investigation and learning.
+### ABAP Code Explanation
 
----
-
-### 4. ABAP Code Explanation
-
-A future developer-focused mode could allow users to submit ABAP code and receive structured explanations covering:
+A developer-focused mode could allow ABAP snippets to be submitted for analysis covering:
 
 - What the code does
 - Important ABAP statements
-- Relevant ABAP concepts
+- Related ABAP concepts
 - Potential issues
 - Readability suggestions
-- Related SAP development objects
+- Related development objects
 
-This would extend the project beyond SAP terminology search into ABAP development assistance.
+### Related SAP Knowledge
 
----
-
-### 5. Related SAP Knowledge
-
-Results could automatically suggest related concepts and tools.
+Results could recommend related SAP concepts, transactions, and development tools.
 
 For example:
 
@@ -524,71 +838,17 @@ For example:
     Programs     Classes    Dictionary
 ```
 
-This could turn individual searches into guided SAP learning paths.
+This could turn individual searches into guided learning paths.
 
----
+### SAP OData Integration
 
-### 6. Response Caching
+Future versions could integrate with authorized SAP OData services.
 
-AI-generated explanations could be cached after successful generation.
+This could allow the application to move beyond static knowledge and general AI-generated explanations toward controlled SAP system context.
 
-For example:
+### SAP Gateway / SAP BTP
 
-```text
-First request
-     |
-     v
-Gemini API
-     |
-     v
-AI Explanation
-     |
-     v
-Cache
-
-
-Same question later
-     |
-     v
-Cached Explanation
-     |
-     v
-No new AI request
-```
-
-This could reduce repeated external API calls, improve response times, and decrease pressure on AI service quotas.
-
----
-
-### 7. Expanded Curated Knowledge Base
-
-The local knowledge layer could be expanded to cover more frequently used:
-
-- SAP T-Codes
-- ABAP concepts
-- SAP Basis concepts
-- Runtime errors
-- Development objects
-- SAP terminology
-- Common troubleshooting scenarios
-
-Increasing local coverage would allow more questions to be answered without depending on an external AI request.
-
----
-
-### 8. SAP OData Integration
-
-Future versions could integrate with SAP OData services to retrieve authorized SAP data through defined service interfaces.
-
-This would allow the project to move beyond static local knowledge and general AI-generated explanations.
-
----
-
-### 9. SAP Gateway / SAP BTP Integration
-
-SAP Gateway or SAP BTP could eventually provide a bridge between the application and SAP services.
-
-A future architecture could evolve toward:
+A future architecture could explore SAP Gateway or SAP BTP as an integration layer:
 
 ```text
                     SAP Explain AI
@@ -612,205 +872,7 @@ A future architecture could evolve toward:
            Authorized SAP Data
 ```
 
-Any real-system integration would require appropriate authentication, authorization, and security controls.
-
----
-
-### 10. Context-Aware SAP Assistance
-
-With authorized SAP integration, a future version could potentially combine:
-
-- Curated SAP knowledge
-- AI-generated explanations
-- Query classification
-- Relevant system context
-- Related transactions
-- Troubleshooting guidance
-
-This would move the project closer to a specialized technical assistant rather than a general-purpose question-answering interface.
-
----
-
-## AI Error Handling
-
-Because SAP Explain AI depends on an external AI service for fallback explanations, the application explicitly handles different failure conditions.
-
-### Quota Exhaustion
-
-When Gemini responds with HTTP `429`, the backend identifies the condition and returns:
-
-```json
-{
-  "success": false,
-  "error": "AI_QUOTA_EXCEEDED",
-  "message": "The AI request quota has been reached. Local SAP searches are still available. Please try AI-generated searches again later."
-}
-```
-
-The frontend then displays a dedicated quota warning.
-
-### Other AI Failures
-
-Other Gemini or backend failures are returned separately as:
-
-```text
-AI_SERVICE_ERROR
-```
-
-This prevents temporary provider limitations from being presented as if the entire SAP Explain AI application had failed.
-
----
-
-## Security
-
-The Gemini API key is stored using an environment variable:
-
-```env
-GEMINI_API_KEY=your_api_key_here
-```
-
-The `.env` file is excluded from Git through `.gitignore`.
-
-The frontend does **not** communicate directly with Gemini.
-
-Instead:
-
-```text
-Browser
-   |
-   v
-React Frontend
-   |
-   v
-Express Backend
-   |
-   v
-Gemini API
-```
-
-This prevents the API key from being bundled into the client-side application.
-
-> Never commit a real API key or `.env` file to GitHub.
-
----
-
-## Running the Project Locally
-
-### Prerequisites
-
-Make sure the following are installed:
-
-- Node.js
-- npm
-- Git
-
-A Gemini API key is also required to use AI-generated explanations.
-
-### 1. Clone the Repository
-
-```bash
-git clone https://github.com/InshaZeeshan/sap-explain-ai.git
-```
-
-Move into the project directory:
-
-```bash
-cd sap-explain-ai
-```
-
-### 2. Install Dependencies
-
-```bash
-npm install
-```
-
-### 3. Configure the Environment Variable
-
-Create a `.env` file in the project root:
-
-```env
-GEMINI_API_KEY=your_gemini_api_key
-```
-
-Replace `your_gemini_api_key` with your own API key.
-
-Do not commit this file.
-
-### 4. Start the Backend
-
-```bash
-npx tsx server/index.ts
-```
-
-The backend runs locally on:
-
-```text
-http://localhost:3001
-```
-
-The health endpoint can be checked at:
-
-```text
-http://localhost:3001/api/health
-```
-
-A successful response should indicate that the SAP Explain AI backend is running.
-
-### 5. Start the Frontend
-
-Open another terminal and run:
-
-```bash
-npm run dev
-```
-
-Open the local URL displayed by Vite in your browser.
-
----
-
-## Production Build
-
-To verify that the frontend builds successfully for production:
-
-```bash
-npm run build
-```
-
-Vite generates the production frontend inside:
-
-```text
-dist/
-```
-
----
-
-## What This Project Demonstrates
-
-SAP Explain AI was built as a portfolio and learning project demonstrating practical use of:
-
-- React component architecture
-- TypeScript
-- React hooks and state management
-- Client-side routing
-- Responsive UI development
-- Service-layer separation
-- REST-style frontend/backend communication
-- Node.js and Express
-- Environment variables and secret management
-- External AI API integration
-- Asynchronous request handling
-- Loading states
-- Provider-specific error handling
-- AI quota handling
-- Markdown rendering
-- Local-first fallback logic
-- Graceful degradation when an external service is unavailable
-- Git and GitHub workflow
-- Domain-focused application design
-
-It also explores a broader software-design question:
-
-> How can a general-purpose AI model be placed behind a domain-specific application architecture instead of simply building another generic chatbot interface?
+Any real SAP system integration would require appropriate authentication, authorization, API design, and security controls.
 
 ---
 
@@ -822,56 +884,82 @@ The current version:
 
 - Does not connect to a live SAP system
 - Does not retrieve production SAP data
-- Does not perform SAP system changes
-- Does not provide guaranteed troubleshooting or root-cause analysis
-- Uses an external Gemini API for AI fallback responses
-- Can temporarily lose AI-generated fallback functionality when the external API quota is exhausted
-- Has a limited curated local knowledge base
-- Depends on the availability and limits of the configured external AI service
-- Requires verification of AI-generated technical information
+- Does not make changes to SAP systems
+- Does not provide guaranteed root-cause analysis
+- Uses a limited curated local SAP knowledge base
+- Depends on an external AI provider for unmatched queries
+- Is subject to the configured AI provider's quotas and rate limits
+- Can receive inaccurate or incomplete AI-generated explanations
+- Requires important technical information to be independently verified
 
-Importantly, **AI quota exhaustion does not disable local knowledge-base results**. Queries already supported locally continue to work without Gemini.
-
-These limitations provide clear areas for future development, including caching, expanded curated knowledge, higher-capacity AI infrastructure, and SAP integration.
+These limitations define clear boundaries for the current prototype and provide areas for future development.
 
 ---
 
 ## Project Status
 
-**Current Stage:** Working Prototype
+**Current Stage:** Deployed Working Prototype
 
 ### Implemented
 
 - Local SAP knowledge search
 - React and TypeScript frontend
-- Node.js/Express backend
+- Node.js and Express backend
 - Gemini API integration
 - Local-first AI fallback architecture
-- Submit-only search behavior
-- Loading state
-- AI quota detection and dedicated UI feedback
-- General AI service error handling
-- Markdown rendering for AI responses
-- Responsive search interface
+- Natural-language SAP queries
+- Loading states
+- Quota-aware error handling
+- AI service-error handling
+- Graceful degradation
+- Responsive interface
 - Client-side routing
 - Custom 404 page
 - Server-side API key protection
-- Project About/Future Vision page
+- Production environment configuration
+- CORS configuration
+- Separate frontend/backend deployment
+- About and Future Vision page
 - Git/GitHub version control
+- Live production deployment
 
 ### Planned
 
 - Structured SAP responses
 - Intelligent query classification
 - Expanded SAP knowledge base
-- Response caching
 - Guided SAP error troubleshooting
 - ABAP code explanation
 - Related SAP knowledge recommendations
 - SAP OData integration
 - SAP Gateway / SAP BTP exploration
 - Context-aware SAP assistance
-- Additional AI-service resilience
+
+---
+
+## What I Learned
+
+Building SAP Explain AI involved more than connecting a frontend to an AI API.
+
+The project required designing and implementing:
+
+- A hybrid local/AI search flow
+- Frontend and backend separation
+- REST-style API communication
+- Environment-specific API configuration
+- Secure API credential handling
+- External service integration
+- Asynchronous request handling
+- Loading and error states
+- Provider quota handling
+- Graceful degradation
+- CORS configuration
+- Production frontend/backend deployment
+- Debugging differences between local and production environments
+
+The project also explores a broader software-design question:
+
+> **How can a general-purpose AI model be placed behind a domain-specific application architecture instead of simply building another generic chatbot interface?**
 
 ---
 
@@ -883,7 +971,7 @@ It is **not affiliated with, endorsed by, or sponsored by SAP**.
 
 SAP and other SAP product names are trademarks or registered trademarks of their respective owners.
 
-AI-generated explanations can be inaccurate or incomplete. Information produced by this application should be independently verified before being used for decisions or changes in a production SAP environment.
+AI-generated explanations may be inaccurate, incomplete, or outdated. Information produced by this application should be independently verified before being used for decisions, configuration, development, or changes in a production SAP environment.
 
 ---
 
@@ -891,7 +979,9 @@ AI-generated explanations can be inaccurate or incomplete. Information produced 
 
 **Insha Zeeshan**
 
-This project was built as a hands-on exploration of **SAP, full-stack web development, API integration, and generative AI**.
+Built as a hands-on exploration of:
+
+**SAP · Full-Stack Development · TypeScript · API Development · Generative AI · Production Deployment**
 
 ---
 
