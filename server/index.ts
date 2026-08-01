@@ -1,5 +1,6 @@
 import express from "express";
 import "dotenv/config";
+import cors from "cors";
 import { GoogleGenAI } from "@google/genai";
 
 const app = express();
@@ -9,6 +10,21 @@ const PORT = process.env.PORT || 3001;
 const ai = new GoogleGenAI({
   apiKey: process.env.GEMINI_API_KEY,
 });
+
+/*
+ * Allow the deployed frontend and local development
+ * frontend to communicate with this backend.
+ */
+app.use(
+  cors({
+    origin: [
+      "http://localhost:5173",
+      "https://sap-explain-ai-frontend.onrender.com",
+    ],
+    methods: ["GET", "POST"],
+    allowedHeaders: ["Content-Type"],
+  })
+);
 
 /*
  * Allows the backend to understand JSON
