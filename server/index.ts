@@ -50,7 +50,7 @@ app.post("/api/explain", async (req, res) => {
 
   try {
     const response = await ai.models.generateContent({
-      model: "gemini-3.6-flash",
+      model: "gemini-3.5-flash-lite",
       contents: `In one short sentence, explain this SAP term: ${query}`,
     });
 
