@@ -28,20 +28,34 @@ export class AIServiceError extends Error {
   }
 }
 
+/*
+ * Backend base URL.
+ *
+ * During local development this is empty, so requests
+ * continue to use /api/explain and the Vite proxy.
+ *
+ * In production, VITE_API_BASE_URL will point to the
+ * deployed Render backend.
+ */
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "";
+
 export async function explainWithAI(
   query: string
 ): Promise<ExplainResponse> {
-  const response = await fetch("/api/explain", {
-    method: "POST",
+  const response = await fetch(
+    `${API_BASE_URL}/api/explain`,
+    {
+      method: "POST",
 
-    headers: {
-      "Content-Type": "application/json",
-    },
+      headers: {
+        "Content-Type": "application/json",
+      },
 
-    body: JSON.stringify({
-      query,
-    }),
-  });
+      body: JSON.stringify({
+        query,
+      }),
+    }
+  );
 
   /*
    * If the backend returns an error, read the JSON
