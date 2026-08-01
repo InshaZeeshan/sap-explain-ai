@@ -4,7 +4,7 @@ import { GoogleGenAI } from "@google/genai";
 
 const app = express();
 
-const PORT = 3001;
+const PORT = process.env.PORT || 3001;
 
 const ai = new GoogleGenAI({
   apiKey: process.env.GEMINI_API_KEY,
