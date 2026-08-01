@@ -1,12 +1,19 @@
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Sparkles } from "lucide-react";
+import {
+  AlertTriangle,
+  Sparkles,
+} from "lucide-react";
+import ReactMarkdown from "react-markdown";
 
 import { Container } from "../components/common/Container";
 import { SearchBar } from "../components/search/SearchBar";
 import { useSearch } from "../hooks/useSearch";
-import { explainWithAI } from "../services/aiService";
+import {
+  AIServiceError,
+  explainWithAI,
+} from "../services/aiService";
 
 import {
   categoryLabels,
@@ -28,6 +35,7 @@ export function SearchResults() {
   const [aiExplanation, setAiExplanation] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [aiError, setAiError] = useState<string | null>(null);
+  const [aiErrorCode, setAiErrorCode] = useState<string | null>(null);
 
   /*
    * True only when the text currently in the search box
@@ -43,6 +51,7 @@ export function SearchResults() {
     setIsLoading(true);
     setAiExplanation(null);
     setAiError(null);
+    setAiErrorCode(null);
 
     try {
       const response = await explainWithAI(searchQuery);
@@ -51,9 +60,21 @@ export function SearchResults() {
     } catch (error) {
       console.error("AI explanation failed:", error);
 
-      setAiError(
-        "Unable to generate an AI explanation. Please try again."
-      );
+      /*
+       * The backend returned a known AI-related error.
+       */
+      if (error instanceof AIServiceError) {
+        setAiErrorCode(error.code);
+        setAiError(error.message);
+      } else {
+        /*
+         * Unexpected frontend/network failure.
+         */
+        setAiErrorCode("UNKNOWN_ERROR");
+        setAiError(
+          "Unable to connect to the AI service. Please try again later."
+        );
+      }
     } finally {
       setIsLoading(false);
     }
@@ -169,9 +190,68 @@ export function SearchResults() {
                 {initialQuery}
               </h2>
 
-              <p className="mt-4 whitespace-pre-wrap text-sm leading-7 text-neutral-300">
-                {aiExplanation}
-              </p>
+              {/* Gemini responses can contain Markdown */}
+              <div className="mt-4 text-sm leading-7 text-neutral-300">
+                <ReactMarkdown
+                  components={{
+                    p: ({ children }) => (
+                      <p className="mb-4 last:mb-0">
+                        {children}
+                      </p>
+                    ),
+
+                    strong: ({ children }) => (
+                      <strong className="font-semibold text-neutral-100">
+                        {children}
+                      </strong>
+                    ),
+
+                    h1: ({ children }) => (
+                      <h3 className="mb-3 mt-6 text-lg font-semibold text-neutral-50">
+                        {children}
+                      </h3>
+                    ),
+
+                    h2: ({ children }) => (
+                      <h3 className="mb-3 mt-6 text-lg font-semibold text-neutral-50">
+                        {children}
+                      </h3>
+                    ),
+
+                    h3: ({ children }) => (
+                      <h3 className="mb-3 mt-5 font-semibold text-neutral-100">
+                        {children}
+                      </h3>
+                    ),
+
+                    ul: ({ children }) => (
+                      <ul className="mb-4 ml-5 list-disc space-y-2">
+                        {children}
+                      </ul>
+                    ),
+
+                    ol: ({ children }) => (
+                      <ol className="mb-4 ml-5 list-decimal space-y-2">
+                        {children}
+                      </ol>
+                    ),
+
+                    li: ({ children }) => (
+                      <li className="pl-1">
+                        {children}
+                      </li>
+                    ),
+
+                    code: ({ children }) => (
+                      <code className="rounded bg-neutral-800 px-1.5 py-0.5 font-mono text-[13px] text-blue-300">
+                        {children}
+                      </code>
+                    ),
+                  }}
+                >
+                  {aiExplanation}
+                </ReactMarkdown>
+              </div>
 
               <p className="mt-6 border-t border-neutral-800 pt-4 text-xs text-neutral-500">
                 AI-generated explanations may contain inaccuracies. Verify
@@ -181,13 +261,57 @@ export function SearchResults() {
             </motion.article>
           )}
 
-        {/* AI Error */}
+        {/* Gemini Quota Exceeded */}
         {isSubmittedQuery &&
           results.length === 0 &&
           !isLoading &&
-          aiError && (
+          aiError &&
+          aiErrorCode === "AI_QUOTA_EXCEEDED" && (
+            <motion.div
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.35 }}
+              className="rounded-2xl border border-amber-900/50 bg-amber-950/20 p-6 sm:p-7"
+            >
+              <div className="flex items-start gap-4">
+                <div className="mt-0.5 rounded-lg bg-amber-950/50 p-2">
+                  <AlertTriangle
+                    className="h-5 w-5 text-amber-400"
+                    aria-hidden="true"
+                  />
+                </div>
+
+                <div>
+                  <h2 className="text-lg font-semibold text-amber-200">
+                    AI request quota reached
+                  </h2>
+
+                  <p className="mt-2 text-sm leading-6 text-neutral-300">
+                    {aiError}
+                  </p>
+
+                  <p className="mt-3 text-sm leading-6 text-neutral-500">
+                    This limitation affects Gemini-powered AI explanations
+                    only. Searches available in the local SAP knowledge base
+                    continue to work normally.
+                  </p>
+                </div>
+              </div>
+            </motion.div>
+          )}
+
+        {/* Other AI Errors */}
+        {isSubmittedQuery &&
+          results.length === 0 &&
+          !isLoading &&
+          aiError &&
+          aiErrorCode !== "AI_QUOTA_EXCEEDED" && (
             <div className="rounded-2xl border border-red-900/50 bg-red-950/20 p-6 text-center">
-              <p className="text-sm text-red-300">
+              <p className="text-sm font-medium text-red-300">
+                AI service unavailable
+              </p>
+
+              <p className="mt-2 text-sm text-red-300/80">
                 {aiError}
               </p>
             </div>

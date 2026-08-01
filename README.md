@@ -84,7 +84,9 @@ The current version of SAP Explain AI includes:
   - General SAP technical questions
 - **Submit-only search behavior** to prevent unnecessary searches while typing
 - Loading feedback while an AI response is being generated
-- Error handling for failed AI requests
+- Dedicated handling for AI quota exhaustion
+- Separate handling for general AI service failures
+- Markdown rendering for AI-generated responses
 - Dedicated visual treatment for AI-generated answers
 - Responsive user interface
 - Client-side routing with a custom 404 page
@@ -97,7 +99,7 @@ The current version of SAP Explain AI includes:
 
 When a user submits a search, SAP Explain AI first checks whether the query can be answered using its local SAP knowledge base.
 
-If a matching result exists, it is displayed immediately.
+If a matching result exists, it is displayed immediately without making an AI request.
 
 If no matching local result exists, the frontend calls the application's backend API. The Express backend communicates with Gemini using a server-side API key and returns the generated explanation to the frontend.
 
@@ -123,11 +125,74 @@ Result       |
              v
          Gemini API
              |
-             v
-      AI-generated Result
+       +-----+------+
+       |            |
+    Success      API Error
+       |            |
+       v            v
+AI-generated   Graceful Error
+   Result        Handling
 ```
 
 The Gemini API key remains on the server and is not exposed to frontend code.
+
+---
+
+## Current AI Service Limitation
+
+SAP Explain AI currently uses the **Gemini API** as its AI fallback when a submitted query cannot be answered by the local knowledge base.
+
+The API tier used by this portfolio project has a **limited request quota**. As a result, Gemini-powered explanations may become temporarily unavailable when the available quota is exhausted.
+
+This limitation affects **AI-generated fallback responses only**.
+
+The application's curated local knowledge base remains independent of Gemini and continues to provide results for queries it already supports.
+
+When the backend detects a Gemini quota response, it returns a specific error:
+
+```text
+AI_QUOTA_EXCEEDED
+```
+
+The frontend recognizes this condition and displays a dedicated **AI request quota reached** message instead of presenting the situation as a generic application failure.
+
+Conceptually:
+
+```text
+                   Search
+                      |
+                      v
+             Local Knowledge Base
+                      |
+              +-------+-------+
+              |               |
+            Match          No Match
+              |               |
+              v               v
+         Local Result      Gemini API
+                              |
+                       +------+------+
+                       |             |
+                    Success        Quota
+                       |          Exhausted
+                       v             |
+                  AI Result          v
+                              Quota Warning
+```
+
+The exact external API quota can depend on the configured Gemini model, account, project, and service tier. For this reason, SAP Explain AI does not assume a fixed number of available AI requests.
+
+A more production-oriented implementation could reduce this dependency through:
+
+- A higher-capacity API tier
+- Response caching
+- A substantially expanded local SAP knowledge base
+- Request throttling and rate controls
+- Reuse of previously generated explanations
+- Improved retry and service-resilience strategies
+- Monitoring of external AI service availability
+
+This is an external-service constraint of the current prototype rather than a limitation of the local search architecture itself.
 
 ---
 
@@ -142,6 +207,7 @@ The Gemini API key remains on the server and is not exposed to frontend code.
 - React Router DOM
 - Framer Motion
 - Lucide React
+- React Markdown
 
 ### Backend
 
@@ -235,15 +301,15 @@ Manages search input and local search results.
 
 **`aiService.ts`**
 
-Handles communication between the React frontend and the backend AI endpoint.
+Handles communication between the React frontend and the backend AI endpoint. It also preserves backend AI error codes so the interface can distinguish quota exhaustion from other service failures.
 
 **`server/index.ts`**
 
-Runs the Express backend and securely communicates with Gemini.
+Runs the Express backend, securely communicates with Gemini, and translates external AI errors into application-specific responses such as `AI_QUOTA_EXCEEDED`.
 
 **`SearchResults.tsx`**
 
-Coordinates local results, AI fallback, loading states, errors, and result presentation.
+Coordinates local results, AI fallback, loading states, quota handling, general errors, Markdown rendering, and result presentation.
 
 ---
 
@@ -269,7 +335,7 @@ What is SAP Basis?
 
 Queries already available in the local knowledge base are answered locally.
 
-Queries without a local match are passed to the AI fallback.
+Queries without a local match are passed to the AI fallback when the external AI service is available.
 
 ---
 
@@ -302,7 +368,9 @@ AI Explanation
 
 This approach provides a foundation for maintaining curated answers for important SAP concepts while retaining the flexibility to answer questions outside the local dataset.
 
-It also creates a clear architectural boundary between **domain knowledge maintained by the application** and **content generated dynamically by an AI model**.
+It also creates a clear architectural boundary between **domain knowledge maintained by the application** and **content generated dynamically by an external AI model**.
+
+The local-first approach additionally reduces unnecessary AI requests and helps limit dependence on external API availability and quota.
 
 ---
 
@@ -460,7 +528,55 @@ This could turn individual searches into guided SAP learning paths.
 
 ---
 
-### 6. SAP OData Integration
+### 6. Response Caching
+
+AI-generated explanations could be cached after successful generation.
+
+For example:
+
+```text
+First request
+     |
+     v
+Gemini API
+     |
+     v
+AI Explanation
+     |
+     v
+Cache
+
+
+Same question later
+     |
+     v
+Cached Explanation
+     |
+     v
+No new AI request
+```
+
+This could reduce repeated external API calls, improve response times, and decrease pressure on AI service quotas.
+
+---
+
+### 7. Expanded Curated Knowledge Base
+
+The local knowledge layer could be expanded to cover more frequently used:
+
+- SAP T-Codes
+- ABAP concepts
+- SAP Basis concepts
+- Runtime errors
+- Development objects
+- SAP terminology
+- Common troubleshooting scenarios
+
+Increasing local coverage would allow more questions to be answered without depending on an external AI request.
+
+---
+
+### 8. SAP OData Integration
 
 Future versions could integrate with SAP OData services to retrieve authorized SAP data through defined service interfaces.
 
@@ -468,7 +584,7 @@ This would allow the project to move beyond static local knowledge and general A
 
 ---
 
-### 7. SAP Gateway / SAP BTP Integration
+### 9. SAP Gateway / SAP BTP Integration
 
 SAP Gateway or SAP BTP could eventually provide a bridge between the application and SAP services.
 
@@ -500,7 +616,7 @@ Any real-system integration would require appropriate authentication, authorizat
 
 ---
 
-### 8. Context-Aware SAP Assistance
+### 10. Context-Aware SAP Assistance
 
 With authorized SAP integration, a future version could potentially combine:
 
@@ -512,6 +628,36 @@ With authorized SAP integration, a future version could potentially combine:
 - Troubleshooting guidance
 
 This would move the project closer to a specialized technical assistant rather than a general-purpose question-answering interface.
+
+---
+
+## AI Error Handling
+
+Because SAP Explain AI depends on an external AI service for fallback explanations, the application explicitly handles different failure conditions.
+
+### Quota Exhaustion
+
+When Gemini responds with HTTP `429`, the backend identifies the condition and returns:
+
+```json
+{
+  "success": false,
+  "error": "AI_QUOTA_EXCEEDED",
+  "message": "The AI request quota has been reached. Local SAP searches are still available. Please try AI-generated searches again later."
+}
+```
+
+The frontend then displays a dedicated quota warning.
+
+### Other AI Failures
+
+Other Gemini or backend failures are returned separately as:
+
+```text
+AI_SERVICE_ERROR
+```
+
+This prevents temporary provider limitations from being presented as if the entire SAP Explain AI application had failed.
 
 ---
 
@@ -653,8 +799,12 @@ SAP Explain AI was built as a portfolio and learning project demonstrating pract
 - Environment variables and secret management
 - External AI API integration
 - Asynchronous request handling
-- Loading and error states
+- Loading states
+- Provider-specific error handling
+- AI quota handling
+- Markdown rendering
 - Local-first fallback logic
+- Graceful degradation when an external service is unavailable
 - Git and GitHub workflow
 - Domain-focused application design
 
@@ -674,11 +824,15 @@ The current version:
 - Does not retrieve production SAP data
 - Does not perform SAP system changes
 - Does not provide guaranteed troubleshooting or root-cause analysis
-- Depends on AI-generated content when a local answer is unavailable
+- Uses an external Gemini API for AI fallback responses
+- Can temporarily lose AI-generated fallback functionality when the external API quota is exhausted
 - Has a limited curated local knowledge base
+- Depends on the availability and limits of the configured external AI service
 - Requires verification of AI-generated technical information
 
-These limitations are intentional and provide clear areas for future development.
+Importantly, **AI quota exhaustion does not disable local knowledge-base results**. Queries already supported locally continue to work without Gemini.
+
+These limitations provide clear areas for future development, including caching, expanded curated knowledge, higher-capacity AI infrastructure, and SAP integration.
 
 ---
 
@@ -693,7 +847,11 @@ These limitations are intentional and provide clear areas for future development
 - Node.js/Express backend
 - Gemini API integration
 - Local-first AI fallback architecture
-- Loading and error handling
+- Submit-only search behavior
+- Loading state
+- AI quota detection and dedicated UI feedback
+- General AI service error handling
+- Markdown rendering for AI responses
 - Responsive search interface
 - Client-side routing
 - Custom 404 page
@@ -706,12 +864,14 @@ These limitations are intentional and provide clear areas for future development
 - Structured SAP responses
 - Intelligent query classification
 - Expanded SAP knowledge base
+- Response caching
 - Guided SAP error troubleshooting
 - ABAP code explanation
 - Related SAP knowledge recommendations
 - SAP OData integration
 - SAP Gateway / SAP BTP exploration
 - Context-aware SAP assistance
+- Additional AI-service resilience
 
 ---
 

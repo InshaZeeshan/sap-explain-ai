@@ -1,4 +1,6 @@
 import { motion } from "framer-motion";
+import { AlertTriangle } from "lucide-react";
+
 import { Container } from "../components/common/Container";
 import { SectionTitle } from "../components/common/SectionTitle";
 
@@ -126,6 +128,53 @@ export function About() {
             </li>
           ))}
         </ul>
+      </motion.div>
+
+      {/* Current AI Limitation */}
+      <motion.div
+        initial={{ opacity: 0, y: 12 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.4 }}
+        className="mt-8 rounded-2xl border border-amber-900/50 bg-amber-950/20 p-6 sm:p-7"
+      >
+        <div className="flex items-start gap-4">
+          <div className="mt-0.5 rounded-lg bg-amber-950/50 p-2">
+            <AlertTriangle
+              className="h-5 w-5 text-amber-400"
+              aria-hidden="true"
+            />
+          </div>
+
+          <div>
+            <h3 className="text-sm font-semibold uppercase tracking-wide text-amber-300">
+              Current AI Limitation
+            </h3>
+
+            <div className="mt-4 space-y-4 text-sm leading-7 text-neutral-300">
+              <p>
+                SAP Explain AI currently uses the Gemini API as its AI
+                fallback when a query cannot be answered by the local
+                knowledge base. The API tier used by this portfolio project
+                has a limited request quota, so AI-generated explanations may
+                become temporarily unavailable when that quota is exhausted.
+              </p>
+
+              <p>
+                This does not disable the entire application. Results contained
+                in the curated local SAP knowledge base remain available
+                independently of the Gemini API.
+              </p>
+
+              <p className="text-neutral-400">
+                A production-oriented version could reduce this dependency
+                through a higher-capacity API tier, response caching, a larger
+                local knowledge base, request controls, and additional
+                resilience around the external AI service.
+              </p>
+            </div>
+          </div>
+        </div>
       </motion.div>
 
       {/* Future Vision */}
